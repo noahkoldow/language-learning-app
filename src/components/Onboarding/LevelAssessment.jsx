@@ -1,16 +1,12 @@
 // CEFR Level Assessment Component
-import { useState } from 'react';
 import { Card } from '../UI/Card';
-import { Button } from '../UI/Button';
 import { CEFR_LEVELS } from '../../utils/cefrLevels';
 
-export function LevelAssessment({ onNext, onBack }) {
-  const [selectedLevel, setSelectedLevel] = useState('');
+export function LevelAssessment({ userData, updateUserData }) {
+  const selectedLevel = userData.level || '';
 
-  const handleNext = () => {
-    if (selectedLevel) {
-      onNext({ level: selectedLevel });
-    }
+  const handleLevelChange = (level) => {
+    updateUserData({ level });
   };
 
   return (
@@ -28,7 +24,7 @@ export function LevelAssessment({ onNext, onBack }) {
         {Object.values(CEFR_LEVELS).map((level) => (
           <button
             key={level.code}
-            onClick={() => setSelectedLevel(level.code)}
+            onClick={() => handleLevelChange(level.code)}
             className={`w-full p-4 text-left border-2 rounded-lg transition-colors ${
               selectedLevel === level.code
                 ? 'border-primary-600 bg-primary-50'
@@ -54,15 +50,6 @@ export function LevelAssessment({ onNext, onBack }) {
             </div>
           </button>
         ))}
-      </div>
-
-      <div className="flex justify-between mt-8">
-        <Button variant="secondary" onClick={onBack}>
-          Back
-        </Button>
-        <Button onClick={handleNext} disabled={!selectedLevel}>
-          Complete Setup
-        </Button>
       </div>
     </Card>
   );

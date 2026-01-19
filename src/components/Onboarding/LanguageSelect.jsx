@@ -1,7 +1,5 @@
 // Language Selection Component
-import { useState } from 'react';
 import { Card } from '../UI/Card';
-import { Button } from '../UI/Button';
 
 const LANGUAGES = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -14,14 +12,16 @@ const LANGUAGES = [
   { code: 'pl', name: 'Polish', flag: '🇵🇱' },
 ];
 
-export function LanguageSelect({ onNext, onBack }) {
-  const [nativeLanguage, setNativeLanguage] = useState('');
-  const [targetLanguage, setTargetLanguage] = useState('');
+export function LanguageSelect({ userData, updateUserData }) {
+  const nativeLanguage = userData.nativeLanguage || '';
+  const targetLanguage = userData.targetLanguage || '';
 
-  const handleNext = () => {
-    if (nativeLanguage && targetLanguage && nativeLanguage !== targetLanguage) {
-      onNext({ nativeLanguage, targetLanguage });
-    }
+  const handleNativeLanguageChange = (lang) => {
+    updateUserData({ nativeLanguage: lang });
+  };
+
+  const handleTargetLanguageChange = (lang) => {
+    updateUserData({ targetLanguage: lang });
   };
 
   return (
@@ -39,7 +39,7 @@ export function LanguageSelect({ onNext, onBack }) {
             {LANGUAGES.map((lang) => (
               <button
                 key={`native-${lang.code}`}
-                onClick={() => setNativeLanguage(lang.name)}
+                onClick={() => handleNativeLanguageChange(lang.name)}
                 className={`p-3 border-2 rounded-lg transition-colors ${
                   nativeLanguage === lang.name
                     ? 'border-primary-600 bg-primary-50'
@@ -61,7 +61,7 @@ export function LanguageSelect({ onNext, onBack }) {
             {LANGUAGES.map((lang) => (
               <button
                 key={`target-${lang.code}`}
-                onClick={() => setTargetLanguage(lang.name)}
+                onClick={() => handleTargetLanguageChange(lang.name)}
                 className={`p-3 border-2 rounded-lg transition-colors ${
                   targetLanguage === lang.name
                     ? 'border-primary-600 bg-primary-50'
@@ -81,18 +81,6 @@ export function LanguageSelect({ onNext, onBack }) {
             Please select different languages for native and target.
           </p>
         )}
-      </div>
-
-      <div className="flex justify-between mt-8">
-        <Button variant="secondary" onClick={onBack}>
-          Back
-        </Button>
-        <Button
-          onClick={handleNext}
-          disabled={!nativeLanguage || !targetLanguage || nativeLanguage === targetLanguage}
-        >
-          Continue
-        </Button>
       </div>
     </Card>
   );
