@@ -14,7 +14,7 @@ import Register from './components/Auth/Register';
 
 function App() {
   return (
-    <Router>
+    <Router basename="/language-learning-app">
       <AuthProvider>
         <ReaderProvider>
           <Routes>
