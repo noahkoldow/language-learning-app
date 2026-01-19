@@ -1,67 +1,79 @@
-// Google Gemini API Service for structure-preserving translation
-import { GoogleGenerativeAI } from '@google/generative-ai';
+// AIML API Service for Gemini models (OpenAI-compatible interface)
+// This provides an alternative to the Google Gemini API when quota is exhausted
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const AIML_API_KEY = import.meta.env.VITE_AIML_API_KEY;
+const AIML_BASE_URL = 'https://api.aimlapi.com/v1';
 
-let genAI;
-let models = [];
-
-// Model priority list: try newest first, fallback to older models
-const MODEL_PRIORITY = [
-  'gemini-2.0-flash-exp',
+// Model priority list for AIML API
+const AIML_MODEL_PRIORITY = [
   'gemini-2.0-flash',
-  'gemini-1.5-flash-002',
-  'gemini-1.5-pro-002',
+  'gemini-pro',
+  'gemini-1.0-pro',
 ];
 
-// Only initialize if API key is available
-if (API_KEY && API_KEY.trim() !== '') {
-  try {
-    genAI = new GoogleGenerativeAI(API_KEY);
-    // Initialize all models in priority order
-    models = MODEL_PRIORITY.map(modelName => ({
-      name: modelName,
-      instance: genAI.getGenerativeModel({ model: modelName }),
-    }));
-  } catch {
-    // Silent failure - will use fallback services
-    models = [];
-  }
-}
-
 /**
- * Helper function to try API call with multiple model fallbacks
- * @param {Function} apiCall - Function that takes a model and returns a promise
- * @param {string} operationType - Type of operation for error context
+ * Helper function to call AIML API with model fallback
+ * @param {string} prompt - The prompt to send
+ * @param {string} operationType - Type of operation for logging
  * @returns {Promise<string>} - Result from successful model
  */
-async function tryWithModelFallback(apiCall, operationType = 'API call') {
-  if (!models || models.length === 0) {
-    throw new Error('Gemini API not available');
+async function callAIMLAPI(prompt, operationType = 'API call') {
+  if (!AIML_API_KEY || AIML_API_KEY.trim() === '') {
+    throw new Error('AIML API key not configured');
   }
 
   let lastError = null;
-  
-  // Try each model in order
-  for (const { name, instance } of models) {
+
+  // Try each model in priority order
+  for (const modelName of AIML_MODEL_PRIORITY) {
     try {
-      console.log(`Trying Gemini model: ${name} for ${operationType}`);
-      const result = await apiCall(instance);
-      console.log(`Successfully used model: ${name} for ${operationType}`);
+      console.log(`Trying AIML API model: ${modelName} for ${operationType}`);
+      
+      const response = await fetch(`${AIML_BASE_URL}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${AIML_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: modelName,
+          messages: [
+            {
+              role: 'user',
+              content: prompt,
+            },
+          ],
+          max_tokens: 4096,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+        throw new Error('Invalid response format from AIML API');
+      }
+
+      const result = data.choices[0].message.content;
+      console.log(`Successfully used AIML API model: ${modelName} for ${operationType}`);
       return result;
     } catch (error) {
-      console.warn(`Model ${name} failed for ${operationType}:`, error.message);
+      console.warn(`AIML API model ${modelName} failed for ${operationType}:`, error.message);
       lastError = error;
       // Continue to next model
     }
   }
-  
+
   // All models failed
-  throw new Error(`Gemini ${operationType} failed: All models failed. Last error: ${lastError?.message}`);
+  throw new Error(`AIML API ${operationType} failed: All models failed. Last error: ${lastError?.message}`);
 }
 
 /**
- * Translate text with structure preservation
+ * Translate text with structure preservation using AIML API
  * @param {string} text - Text to translate
  * @param {string} targetLanguage - Target language code
  * @param {string} cefrLevel - CEFR level (A1, A2, B1, B2, C1, C2)
@@ -89,15 +101,11 @@ ${sourceLanguage !== 'auto' ? `Source language: ${sourceLanguage}` : ''}
 Text to translate:
 ${text}`;
 
-  return tryWithModelFallback(async (model) => {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text();
-  }, 'translation');
+  return callAIMLAPI(prompt, 'translation');
 }
 
 /**
- * Translate a single word with context
+ * Translate a single word with context using AIML API
  * @param {string} word - Word to translate
  * @param {string} targetLanguage - Target language
  * @param {string} context - Sentence context
@@ -116,15 +124,11 @@ Example: "casa - house, home"
 
 Keep it concise.`;
 
-  return tryWithModelFallback(async (model) => {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text();
-  }, 'word translation');
+  return callAIMLAPI(prompt, 'word translation');
 }
 
 /**
- * Simplify text by reducing CEFR level
+ * Simplify text by reducing CEFR level using AIML API
  * @param {string} text - Text to simplify
  * @param {string} language - Language of the text
  * @param {string} targetLevel - Target CEFR level
@@ -144,11 +148,7 @@ CRITICAL REQUIREMENTS:
 Text to simplify:
 ${text}`;
 
-  return tryWithModelFallback(async (model) => {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text();
-  }, 'simplification');
+  return callAIMLAPI(prompt, 'simplification');
 }
 
 export default {

@@ -1,8 +1,9 @@
 // Main Translation Service with Fallback Chain
 // Orchestrates translation attempts across multiple services:
-// Gemini API -> LibreTranslate -> MyMemory -> Rule-based fallback
+// Gemini API -> AIML API (Gemini via proxy) -> LibreTranslate -> MyMemory -> Rule-based fallback
 
 import { translateWithStructure as geminiTranslate, translateWord as geminiTranslateWord, simplifyText as geminiSimplify } from './gemini';
+import { translateWithStructure as aimlTranslate, translateWord as aimlTranslateWord, simplifyText as aimlSimplify } from './aimlapi';
 import { translateWithLibre } from './libreTranslate';
 import { translateWithMyMemory } from './myMemory';
 import { simplifyForLevel, createPlaceholder } from './simplifier';
@@ -10,6 +11,7 @@ import { simplifyForLevel, createPlaceholder } from './simplifier';
 // Track which API is currently being used
 export const API_PROVIDERS = {
   GEMINI: 'gemini',
+  AIML: 'aiml',
   LIBRE_TRANSLATE: 'libretranslate',
   MYMEMORY: 'mymemory',
   FALLBACK: 'fallback',
@@ -57,6 +59,17 @@ export async function translateWithFallback(
     return { text: result, provider: currentProvider };
   } catch (error) {
     console.warn('Gemini translation failed:', error.message);
+    lastError = error.message;
+  }
+
+  // Try AIML API (Gemini via proxy)
+  try {
+    const result = await aimlTranslate(text, targetLanguage, cefrLevel, sourceLanguage);
+    currentProvider = API_PROVIDERS.AIML;
+    console.info('Using AIML API (Gemini proxy)');
+    return { text: result, provider: currentProvider };
+  } catch (error) {
+    console.warn('AIML API translation failed:', error.message);
     lastError = error.message;
   }
 
@@ -116,6 +129,16 @@ export async function translateWordWithFallback(word, targetLanguage, context = 
     lastError = error.message;
   }
 
+  // Try AIML API (Gemini via proxy)
+  try {
+    const result = await aimlTranslateWord(word, targetLanguage, context);
+    currentProvider = API_PROVIDERS.AIML;
+    return { text: result, provider: currentProvider };
+  } catch (error) {
+    console.warn('AIML API word translation failed:', error.message);
+    lastError = error.message;
+  }
+
   // Try LibreTranslate for word
   try {
     // Note: 'auto' not well supported, may fail for some words
@@ -163,6 +186,17 @@ export async function simplifyWithFallback(text, language, targetLevel) {
     return { text: result, provider: currentProvider };
   } catch (error) {
     console.warn('Gemini simplification failed:', error.message);
+    lastError = error.message;
+  }
+
+  // Try AIML API (Gemini via proxy)
+  try {
+    const result = await aimlSimplify(text, language, targetLevel);
+    currentProvider = API_PROVIDERS.AIML;
+    console.info('Using AIML API for simplification');
+    return { text: result, provider: currentProvider };
+  } catch (error) {
+    console.warn('AIML API simplification failed:', error.message);
     lastError = error.message;
   }
 
