@@ -132,16 +132,16 @@ export function useGestures({
     setTouchStart(null);
   }, [touchStart, onTap, onSwipeLeft, onSwipeRight, onWordTap, onLongPressEnd, onDoubleTapLongPressEnd]);
 
-  const handleTouchCancel = useCallback(() => {
+  const handleTouchCancel = useCallback((e) => {
     clearTimeout(longPressTimer.current);
     clearTimeout(doubleTapTimer.current);
     
     // If long press was active, call end handlers
     if (isLongPress.current && onLongPressEnd) {
-      onLongPressEnd();
+      onLongPressEnd(e);
     }
     if (isDoubleTapLongPress.current && onDoubleTapLongPressEnd) {
-      onDoubleTapLongPressEnd();
+      onDoubleTapLongPressEnd(e);
     }
     
     isLongPress.current = false;
