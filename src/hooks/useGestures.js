@@ -121,17 +121,20 @@ export function useGestures({
             const text = textNode.textContent;
             const offset = range.startOffset;
             
-            // Find word boundaries
+            // Find word boundaries using Unicode-aware regex
+            // \p{L} matches any Unicode letter, \p{N} matches any Unicode number
+            // This supports non-ASCII languages like Chinese, Arabic, etc.
+            const wordCharRegex = /[\p{L}\p{N}''-]/u;
             let start = offset;
             let end = offset;
             
             // Move start backward to find word start
-            while (start > 0 && /\w/.test(text[start - 1])) {
+            while (start > 0 && wordCharRegex.test(text[start - 1])) {
               start--;
             }
             
             // Move end forward to find word end
-            while (end < text.length && /\w/.test(text[end])) {
+            while (end < text.length && wordCharRegex.test(text[end])) {
               end++;
             }
             
