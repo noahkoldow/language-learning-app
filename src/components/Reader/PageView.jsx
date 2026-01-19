@@ -39,8 +39,10 @@ export function PageView() {
       const loadPage = () => {
         const cached = getTranslatedPage(currentPage, currentLevel);
         if (cached) {
+          console.log('Loading cached translation for page:', currentPage, 'level:', currentLevel);
           setDisplayText(cached);
         } else {
+          console.log('Loading original text for page:', currentPage);
           setDisplayText(pages[currentPage]);
         }
       };
@@ -52,9 +54,17 @@ export function PageView() {
     e.preventDefault();
     const newLevel = getLowerLevel(currentLevel, 1);
     
+    console.log('Long press detected - Simplifying by 1 level');
+    console.log('Current page:', currentPage);
+    console.log('Current level:', currentLevel);
+    console.log('Target level:', newLevel);
+    console.log('Target language:', targetLanguage);
+    
     if (newLevel && pages[currentPage]) {
       try {
+        console.log('Calling simplify API...');
         const simplified = await simplify(pages[currentPage], targetLanguage, newLevel);
+        console.log('API response received:', simplified.substring(0, 50) + '...');
         setDisplayText(simplified);
         cacheTranslatedPage(currentPage, newLevel, simplified);
         updateLevel(newLevel);
@@ -70,9 +80,17 @@ export function PageView() {
     e.preventDefault();
     const newLevel = getLowerLevel(currentLevel, 2);
     
+    console.log('Double tap & hold detected - Simplifying by 2 levels');
+    console.log('Current page:', currentPage);
+    console.log('Current level:', currentLevel);
+    console.log('Target level:', newLevel);
+    console.log('Target language:', targetLanguage);
+    
     if (newLevel && pages[currentPage]) {
       try {
+        console.log('Calling simplify API...');
         const simplified = await simplify(pages[currentPage], targetLanguage, newLevel);
+        console.log('API response received:', simplified.substring(0, 50) + '...');
         setDisplayText(simplified);
         cacheTranslatedPage(currentPage, newLevel, simplified);
         updateLevel(newLevel);

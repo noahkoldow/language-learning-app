@@ -14,14 +14,33 @@ export function ReaderProvider({ children }) {
   const [nativeLanguage, setNativeLanguage] = useState('German');
 
   const loadText = useCallback((text, metadata = {}) => {
-    const textPages = splitTextIntoPages(text);
+    let textPages;
+    
+    // Check if text is already an array of pages or needs to be split
+    if (Array.isArray(text)) {
+      // Text is already split into pages
+      textPages = text;
+      console.log('Loading text with pre-split pages:', textPages.length);
+    } else {
+      // Text needs to be split
+      textPages = splitTextIntoPages(text);
+      console.log('Loading text and splitting into pages:', textPages.length);
+    }
+    
     setPages(textPages);
     setCurrentText({
-      content: text,
+      content: Array.isArray(text) ? text.join('\n\n') : text,
       ...metadata,
     });
     setCurrentPage(0);
     setTranslatedPages(new Map());
+    
+    console.log('Text loaded:', {
+      title: metadata.title,
+      language: metadata.language,
+      targetLanguage: metadata.targetLanguage,
+      totalPages: textPages.length,
+    });
   }, []);
 
   const nextPage = useCallback(() => {
