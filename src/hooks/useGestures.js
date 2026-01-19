@@ -111,15 +111,36 @@ export function useGestures({
     } 
     // Detect tap on word
     else if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10 && duration < 200) {
-      const target = e.target;
-      
-      // Check if tap is on text content
-      if (target.nodeType === Node.TEXT_NODE || target.tagName === 'SPAN' || target.tagName === 'P') {
-        if (onWordTap) {
-          // Get word at tap position
-          const range = document.caretRangeFromPoint(touch.clientX, touch.clientY);
-          if (range) {
-            onWordTap(e, range);
+      if (onWordTap) {
+        // Get word at tap position
+        const range = document.caretRangeFromPoint?.(touch.clientX, touch.clientY);
+        if (range && range.startContainer) {
+          // Expand range to select the word at the tap position
+          const textNode = range.startContainer;
+          if (textNode.nodeType === Node.TEXT_NODE) {
+            const text = textNode.textContent;
+            const offset = range.startOffset;
+            
+            // Find word boundaries
+            let start = offset;
+            let end = offset;
+            
+            // Move start backward to find word start
+            while (start > 0 && /\w/.test(text[start - 1])) {
+              start--;
+            }
+            
+            // Move end forward to find word end
+            while (end < text.length && /\w/.test(text[end])) {
+              end++;
+            }
+            
+            // Only select if we found a word
+            if (start < end) {
+              range.setStart(textNode, start);
+              range.setEnd(textNode, end);
+              onWordTap(e, range);
+            }
           }
         }
       }

@@ -1,5 +1,5 @@
 // Page View Component with Gesture Support
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useGestures } from '../../hooks/useGestures';
 import { useReaderContext } from '../../context/ReaderContext';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -27,6 +27,7 @@ export function PageView() {
   const [showFallbackNotice, setShowFallbackNotice] = useState(false);
   const [isPreloading, setIsPreloading] = useState(false);
   const [levelBeforeHold, setLevelBeforeHold] = useState(null); // Store level before hold gesture
+  const isLongPressActive = useRef(false); // Track if long press is still active
 
   // Helper to show fallback notice
   const showFallbackNotification = () => {
@@ -130,6 +131,9 @@ export function PageView() {
   const handleLongPress = async (e) => {
     e.preventDefault();
     
+    // Mark long press as active
+    isLongPressActive.current = true;
+    
     // Store the current level before reducing it
     setLevelBeforeHold(currentLevel);
     
@@ -146,10 +150,16 @@ export function PageView() {
         console.log('Calling simplify API...');
         const simplified = await simplify(pages[currentPage], currentText.language, newLevel);
         console.log('API response received:', simplified.substring(0, 50) + '...');
-        setDisplayText(simplified);
-        cacheTranslatedPage(currentPage, newLevel, simplified);
-        updateLevel(newLevel);
-        showFallbackNotification();
+        
+        // Only apply the simplified text if long press is still active
+        if (isLongPressActive.current) {
+          setDisplayText(simplified);
+          cacheTranslatedPage(currentPage, newLevel, simplified);
+          updateLevel(newLevel);
+          showFallbackNotification();
+        } else {
+          console.log('Long press ended before API response, discarding result');
+        }
       } catch (error) {
         console.error('Simplification error:', error);
         // Don't show error to user, fallback should have been applied
@@ -159,11 +169,16 @@ export function PageView() {
 
   const handleLongPressEnd = () => {
     console.log('Long press ended - Restoring original level');
+    // Mark long press as inactive
+    isLongPressActive.current = false;
     restoreOriginalLevel();
   };
 
   const handleDoubleTapLongPress = async (e) => {
     e.preventDefault();
+    
+    // Mark long press as active
+    isLongPressActive.current = true;
     
     // Store the current level before reducing it
     setLevelBeforeHold(currentLevel);
@@ -181,10 +196,16 @@ export function PageView() {
         console.log('Calling simplify API...');
         const simplified = await simplify(pages[currentPage], currentText.language, newLevel);
         console.log('API response received:', simplified.substring(0, 50) + '...');
-        setDisplayText(simplified);
-        cacheTranslatedPage(currentPage, newLevel, simplified);
-        updateLevel(newLevel);
-        showFallbackNotification();
+        
+        // Only apply the simplified text if long press is still active
+        if (isLongPressActive.current) {
+          setDisplayText(simplified);
+          cacheTranslatedPage(currentPage, newLevel, simplified);
+          updateLevel(newLevel);
+          showFallbackNotification();
+        } else {
+          console.log('Long press ended before API response, discarding result');
+        }
       } catch (error) {
         console.error('Simplification error:', error);
         // Don't show error to user, fallback should have been applied
@@ -194,6 +215,8 @@ export function PageView() {
 
   const handleDoubleTapLongPressEnd = () => {
     console.log('Double tap long press ended - Restoring original level');
+    // Mark long press as inactive
+    isLongPressActive.current = false;
     restoreOriginalLevel();
   };
 
