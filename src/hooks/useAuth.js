@@ -21,8 +21,9 @@ export function useAuth() {
 
   useEffect(() => {
     if (!auth) {
-      setLoading(false);
-      return;
+      // Use setTimeout to avoid synchronous setState in effect
+      const timer = setTimeout(() => setLoading(false), 0);
+      return () => clearTimeout(timer);
     }
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {

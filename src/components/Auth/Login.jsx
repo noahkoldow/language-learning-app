@@ -21,7 +21,7 @@ export function Login() {
     try {
       await signIn(email, password);
       navigate('/library');
-    } catch (err) {
+    } catch {
       setError(authError || 'Failed to sign in');
     } finally {
       setLoading(false);
@@ -35,7 +35,7 @@ export function Login() {
     try {
       await signInWithGoogle();
       navigate('/library');
-    } catch (err) {
+    } catch {
       setError(authError || 'Failed to sign in with Google');
     } finally {
       setLoading(false);

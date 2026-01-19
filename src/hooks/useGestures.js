@@ -63,7 +63,7 @@ export function useGestures({
     setLastTap(now);
   }, [lastTap, onLongPress, onDoubleTapLongPress]);
 
-  const handleTouchMove = useCallback((e) => {
+  const handleTouchMove = useCallback(() => {
     // If user moves finger, cancel long press
     clearTimeout(longPressTimer.current);
     isLongPress.current = false;

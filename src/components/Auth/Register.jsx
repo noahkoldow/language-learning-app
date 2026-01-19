@@ -33,7 +33,7 @@ export function Register() {
     try {
       await signUp(email, password);
       navigate('/onboarding');
-    } catch (err) {
+    } catch {
       setError(authError || 'Failed to create account');
     } finally {
       setLoading(false);

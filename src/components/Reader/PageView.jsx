@@ -27,12 +27,15 @@ export function PageView() {
   useEffect(() => {
     // Load current page
     if (pages[currentPage]) {
-      const cached = getTranslatedPage(currentPage, currentLevel);
-      if (cached) {
-        setDisplayText(cached);
-      } else {
-        setDisplayText(pages[currentPage]);
-      }
+      const loadPage = () => {
+        const cached = getTranslatedPage(currentPage, currentLevel);
+        if (cached) {
+          setDisplayText(cached);
+        } else {
+          setDisplayText(pages[currentPage]);
+        }
+      };
+      loadPage();
     }
   }, [currentPage, currentLevel, pages, getTranslatedPage]);
 

@@ -15,7 +15,7 @@ export function WordPopup({ word, x, y, onClose }) {
       try {
         const result = await translateSingleWord(word, nativeLanguage);
         setTranslation(result);
-      } catch (err) {
+      } catch {
         setError('Translation failed');
       }
     }

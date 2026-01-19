@@ -1,5 +1,4 @@
 // Text Library Component
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useReaderContext } from '../../context/ReaderContext';
 import { Card } from '../UI/Card';
@@ -51,7 +50,6 @@ Ein charakteristisches Merkmal des Deutschen ist die Möglichkeit, durch Komposi
 export function TextLibrary() {
   const navigate = useNavigate();
   const { loadText } = useReaderContext();
-  const [selectedText, setSelectedText] = useState(null);
 
   const handleSelectText = (text) => {
     loadText(text.fullText, {
@@ -70,7 +68,7 @@ export function TextLibrary() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {SAMPLE_TEXTS.map((text) => (
           <Card key={text.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-            <div onClick={() => setSelectedText(text)}>
+            <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 {text.title}
               </h3>

@@ -86,6 +86,7 @@ export function ReaderProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useReaderContext() {
   const context = useContext(ReaderContext);
   if (!context) {
