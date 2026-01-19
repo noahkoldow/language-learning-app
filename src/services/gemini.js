@@ -6,12 +6,14 @@ const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 let genAI;
 let model;
 
-if (API_KEY) {
+// Only initialize if API key is available
+if (API_KEY && API_KEY.trim() !== '') {
   try {
     genAI = new GoogleGenerativeAI(API_KEY);
     model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-  } catch (error) {
-    console.error('Gemini initialization error:', error);
+  } catch {
+    // Silent failure - will use fallback services
+    model = null;
   }
 }
 
@@ -30,8 +32,7 @@ export async function translateWithStructure(
   sourceLanguage = 'auto'
 ) {
   if (!model) {
-    console.warn('Gemini API not initialized. Using placeholder translation.');
-    return `[Translation to ${targetLanguage} at ${cefrLevel} level]\n${text}`;
+    throw new Error('Gemini API not available');
   }
 
   const prompt = `You are a language learning assistant. Translate the following text to ${targetLanguage} at CEFR level ${cefrLevel}.
@@ -54,8 +55,7 @@ ${text}`;
     const response = await result.response;
     return response.text();
   } catch (error) {
-    console.error('Translation error:', error);
-    throw new Error(`Translation failed: ${error.message}`);
+    throw new Error(`Gemini translation failed: ${error.message}`);
   }
 }
 
@@ -68,8 +68,7 @@ ${text}`;
  */
 export async function translateWord(word, targetLanguage, context = '') {
   if (!model) {
-    console.warn('Gemini API not initialized. Using placeholder translation.');
-    return `${word} = [${targetLanguage} translation]`;
+    throw new Error('Gemini API not available');
   }
 
   const prompt = `Translate the word "${word}" to ${targetLanguage}.
@@ -89,8 +88,7 @@ Keep it concise.`;
     const response = await result.response;
     return response.text();
   } catch (error) {
-    console.error('Word translation error:', error);
-    throw new Error(`Word translation failed: ${error.message}`);
+    throw new Error(`Gemini word translation failed: ${error.message}`);
   }
 }
 
@@ -103,8 +101,7 @@ Keep it concise.`;
  */
 export async function simplifyText(text, language, targetLevel) {
   if (!model) {
-    console.warn('Gemini API not initialized. Using placeholder simplification.');
-    return `[Simplified to ${targetLevel}]\n${text}`;
+    throw new Error('Gemini API not available');
   }
 
   const prompt = `You are a language learning assistant. Simplify the following ${language} text to CEFR level ${targetLevel}.
@@ -125,8 +122,7 @@ ${text}`;
     const response = await result.response;
     return response.text();
   } catch (error) {
-    console.error('Simplification error:', error);
-    throw new Error(`Simplification failed: ${error.message}`);
+    throw new Error(`Gemini simplification failed: ${error.message}`);
   }
 }
 
