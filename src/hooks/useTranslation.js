@@ -4,7 +4,6 @@ import {
   translateWithFallback, 
   translateWordWithFallback, 
   simplifyWithFallback,
-  getCurrentProvider,
   API_PROVIDERS,
 } from '../services/translation';
 

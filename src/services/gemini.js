@@ -11,7 +11,7 @@ if (API_KEY && API_KEY.trim() !== '') {
   try {
     genAI = new GoogleGenerativeAI(API_KEY);
     model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-  } catch (error) {
+  } catch {
     // Silent failure - will use fallback services
     model = null;
   }
