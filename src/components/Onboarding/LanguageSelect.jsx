@@ -14,14 +14,18 @@ const LANGUAGES = [
 
 export function LanguageSelect({ userData, updateUserData }) {
   const nativeLanguage = userData.nativeLanguage || '';
-  const targetLanguage = userData.targetLanguage || '';
+  const targetLanguages = userData.targetLanguages || [];
 
   const handleNativeLanguageChange = (lang) => {
     updateUserData({ nativeLanguage: lang });
   };
 
   const handleTargetLanguageChange = (lang) => {
-    updateUserData({ targetLanguage: lang });
+    // Toggle the language in the array
+    const updated = targetLanguages.includes(lang)
+      ? targetLanguages.filter(l => l !== lang)
+      : [...targetLanguages, lang];
+    updateUserData({ targetLanguages: updated });
   };
 
   return (
@@ -55,7 +59,7 @@ export function LanguageSelect({ userData, updateUserData }) {
 
         <div>
           <label className="block text-lg font-medium text-gray-700 mb-3">
-            Language You Want to Learn
+            Languages You Want to Learn (select multiple)
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {LANGUAGES.map((lang) => (
@@ -63,7 +67,7 @@ export function LanguageSelect({ userData, updateUserData }) {
                 key={`target-${lang.code}`}
                 onClick={() => handleTargetLanguageChange(lang.name)}
                 className={`p-3 border-2 rounded-lg transition-colors ${
-                  targetLanguage === lang.name
+                  targetLanguages.includes(lang.name)
                     ? 'border-primary-600 bg-primary-50'
                     : 'border-gray-200 hover:border-gray-300'
                 } ${nativeLanguage === lang.name ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -76,7 +80,7 @@ export function LanguageSelect({ userData, updateUserData }) {
           </div>
         </div>
 
-        {nativeLanguage && targetLanguage && nativeLanguage === targetLanguage && (
+        {nativeLanguage && targetLanguages.some(lang => lang === nativeLanguage) && (
           <p className="text-sm text-red-600 text-center">
             Please select different languages for native and target.
           </p>

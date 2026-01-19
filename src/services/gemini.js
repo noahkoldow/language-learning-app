@@ -10,7 +10,8 @@ let model;
 if (API_KEY && API_KEY.trim() !== '') {
   try {
     genAI = new GoogleGenerativeAI(API_KEY);
-    model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    // Updated to use the current model name (gemini-1.5-flash is newer and more reliable)
+    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
   } catch {
     // Silent failure - will use fallback services
     model = null;

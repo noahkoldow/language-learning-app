@@ -34,7 +34,10 @@ export function Onboarding() {
   const handleComplete = () => {
     // Save to context
     if (userData.nativeLanguage) setNativeLanguage(userData.nativeLanguage);
-    if (userData.targetLanguage) setTargetLanguage(userData.targetLanguage);
+    if (userData.targetLanguages && userData.targetLanguages.length > 0) {
+      // Set the first target language as default
+      setTargetLanguage(userData.targetLanguages[0]);
+    }
     if (userData.level) updateLevel(userData.level);
     
     // Navigate to library
@@ -51,8 +54,9 @@ export function Onboarding() {
     if (step === 1) return true;
     if (step === 2) {
       return userData.nativeLanguage && 
-             userData.targetLanguage && 
-             userData.nativeLanguage !== userData.targetLanguage;
+             userData.targetLanguages && 
+             userData.targetLanguages.length > 0 &&
+             !userData.targetLanguages.includes(userData.nativeLanguage);
     }
     if (step === 3) {
       return userData.level;
@@ -115,7 +119,7 @@ export function Onboarding() {
         <div className="flex justify-between items-center mt-8 max-w-2xl mx-auto">
           {step > 1 ? (
             <Button
-              variant="secondary"
+              variant="primary"
               onClick={handleBack}
               size="lg"
               className="min-w-[120px] min-h-[44px]"
@@ -126,6 +130,7 @@ export function Onboarding() {
             <div />
           )}
           <Button
+            variant="primary"
             onClick={handleNext}
             disabled={!canProceed()}
             size="lg"
