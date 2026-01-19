@@ -78,6 +78,36 @@ export function ReaderProvider({ children }) {
     setTranslatedPages(new Map());
   }, []);
 
+  // Language preference management per text
+  const getTextTargetLanguage = useCallback((textId) => {
+    const stored = localStorage.getItem(`textLanguagePrefs_${textId}`);
+    if (stored) {
+      return stored;
+    }
+    // Default to targetLanguage context or 'de'
+    const langMap = {
+      'german': 'de',
+      'english': 'en',
+      'french': 'fr',
+      'spanish': 'es',
+      'italian': 'it',
+      'portuguese': 'pt',
+      'dutch': 'nl',
+      'polish': 'pl'
+    };
+    const targetLower = targetLanguage.toLowerCase();
+    for (const [name, code] of Object.entries(langMap)) {
+      if (targetLower.startsWith(name)) {
+        return code;
+      }
+    }
+    return 'de';
+  }, [targetLanguage]);
+
+  const setTextTargetLanguage = useCallback((textId, languageCode) => {
+    localStorage.setItem(`textLanguagePrefs_${textId}`, languageCode);
+  }, []);
+
   const value = {
     currentText,
     currentPage,
@@ -96,6 +126,8 @@ export function ReaderProvider({ children }) {
     setTargetLanguage,
     setNativeLanguage,
     clearReader,
+    getTextTargetLanguage,
+    setTextTargetLanguage,
   };
 
   return (
