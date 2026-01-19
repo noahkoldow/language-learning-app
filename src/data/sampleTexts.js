@@ -9,6 +9,7 @@ export const sampleTexts = [
     title: 'The Little Prince',
     author: 'Antoine de Saint-Exupéry',
     language: 'en',
+    level: 'B2', // Original text level
     description: 'A classic tale about a pilot who meets a young prince from another planet.',
     targetLanguage: 'de', // default target
     pages: [
@@ -26,6 +27,7 @@ export const sampleTexts = [
     title: 'Alice in Wonderland',
     author: 'Lewis Carroll',
     language: 'en',
+    level: 'B1', // Original text level
     description: 'Alice falls down a rabbit hole and discovers a fantasy world.',
     targetLanguage: 'de',
     pages: [
@@ -43,6 +45,7 @@ export const sampleTexts = [
     title: 'Le Petit Prince',
     author: 'Antoine de Saint-Exupéry',
     language: 'fr',
+    level: 'B2', // Original text level
     description: 'Un conte classique sur un pilote qui rencontre un jeune prince d\'une autre planète.',
     targetLanguage: 'de', // default target
     pages: [
@@ -60,6 +63,7 @@ export const sampleTexts = [
     title: 'Les Misérables',
     author: 'Victor Hugo',
     language: 'fr',
+    level: 'C1', // Original text level
     description: 'L\'histoire de Jean Valjean, un ancien bagnard qui cherche la rédemption.',
     targetLanguage: 'de',
     pages: [
@@ -77,6 +81,7 @@ export const sampleTexts = [
     title: 'Der kleine Prinz',
     author: 'Antoine de Saint-Exupéry',
     language: 'de',
+    level: 'B2', // Original text level
     description: 'Eine klassische Geschichte über einen Piloten, der einen jungen Prinzen von einem anderen Planeten trifft.',
     targetLanguage: 'en', // default target
     pages: [
@@ -94,6 +99,7 @@ export const sampleTexts = [
     title: 'Faust',
     author: 'Johann Wolfgang von Goethe',
     language: 'de',
+    level: 'C2', // Original text level
     description: 'Die tragische Geschichte des Doktor Faustus und seines Pakts mit Mephistopheles.',
     targetLanguage: 'en',
     pages: [

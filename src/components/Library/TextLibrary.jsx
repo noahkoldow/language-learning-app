@@ -43,6 +43,7 @@ export function TextLibrary() {
         author: text.author,
         language: text.language,
         targetLanguage: text.targetLanguage,
+        level: text.level || 'B2', // Include level for dropdown
         isPagesArray: true,
       });
     } else {
@@ -51,7 +52,7 @@ export function TextLibrary() {
         title: text.title,
         author: text.author,
         language: text.language,
-        level: text.level,
+        level: text.level || 'B2',
       });
     }
     navigate('/reader');
