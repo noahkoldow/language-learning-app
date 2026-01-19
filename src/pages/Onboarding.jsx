@@ -131,7 +131,7 @@ export function Onboarding() {
             size="lg"
             className="min-w-[120px] min-h-[44px]"
           >
-            {step === totalSteps ? 'Los geht\'s' : 'Weiter'}
+            {step === totalSteps ? "Los geht's" : 'Weiter'}
           </Button>
         </div>
       </div>
