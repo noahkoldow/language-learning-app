@@ -14,7 +14,6 @@ export function PageView() {
     currentLevel,
     currentText,
     baseLevel,
-    targetLanguage,
     nextPage, 
     previousPage,
     updateLevel,
@@ -44,9 +43,9 @@ export function PageView() {
     setIsPreloading(true);
     
     try {
-      // Pre-load current page and next 2 pages
+      // Pre-load current page and next 2 pages (ensure pageNum >= 0 and < pages.length)
       const pagesToLoad = [currentPage, currentPage + 1, currentPage + 2].filter(
-        pageNum => pageNum < pages.length
+        pageNum => pageNum >= 0 && pageNum < pages.length
       );
       
       for (const pageNum of pagesToLoad) {
@@ -73,7 +72,7 @@ export function PageView() {
     } finally {
       setIsPreloading(false);
     }
-  }, [currentPage, currentText, baseLevel, pages, getTranslatedPage, simplify, cacheTranslatedPage]);
+  }, [currentPage, currentText, baseLevel, pages, getTranslatedPage, cacheTranslatedPage, simplify]);
 
   // Pre-load pages when text loads, page changes, or base level changes
   useEffect(() => {
