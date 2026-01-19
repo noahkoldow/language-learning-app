@@ -277,6 +277,7 @@ export function PageView() {
             </svg>
             <span className="text-sm font-medium">
               Using alternative translation service
+              {currentProvider === API_PROVIDERS.AIML && ' (AIML API)'}
               {currentProvider === API_PROVIDERS.LIBRE_TRANSLATE && ' (LibreTranslate)'}
               {currentProvider === API_PROVIDERS.MYMEMORY && ' (MyMemory)'}
               {currentProvider === API_PROVIDERS.FALLBACK && ' (offline mode)'}
