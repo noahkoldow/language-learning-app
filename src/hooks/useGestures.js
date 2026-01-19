@@ -13,7 +13,9 @@ const SWIPE_THRESHOLD = 50; // pixels
 export function useGestures({
   onTap,
   onLongPress,
+  onLongPressEnd,
   onDoubleTapLongPress,
+  onDoubleTapLongPressEnd,
   onSwipeLeft,
   onSwipeRight,
   onWordTap,
@@ -80,10 +82,21 @@ export function useGestures({
     const deltaY = touch.clientY - touchStart.y;
     const duration = Date.now() - touchStart.time;
 
-    // If it was a long press, don't process as tap
-    if (isLongPress.current || isDoubleTapLongPress.current) {
+    // If it was a long press, call the end handler and don't process as tap
+    if (isLongPress.current) {
       isLongPress.current = false;
+      if (onLongPressEnd) {
+        onLongPressEnd(e);
+      }
+      setTouchStart(null);
+      return;
+    }
+    
+    if (isDoubleTapLongPress.current) {
       isDoubleTapLongPress.current = false;
+      if (onDoubleTapLongPressEnd) {
+        onDoubleTapLongPressEnd(e);
+      }
       setTouchStart(null);
       return;
     }
@@ -117,15 +130,24 @@ export function useGestures({
     }
 
     setTouchStart(null);
-  }, [touchStart, onTap, onSwipeLeft, onSwipeRight, onWordTap]);
+  }, [touchStart, onTap, onSwipeLeft, onSwipeRight, onWordTap, onLongPressEnd, onDoubleTapLongPressEnd]);
 
   const handleTouchCancel = useCallback(() => {
     clearTimeout(longPressTimer.current);
     clearTimeout(doubleTapTimer.current);
+    
+    // If long press was active, call end handlers
+    if (isLongPress.current && onLongPressEnd) {
+      onLongPressEnd();
+    }
+    if (isDoubleTapLongPress.current && onDoubleTapLongPressEnd) {
+      onDoubleTapLongPressEnd();
+    }
+    
     isLongPress.current = false;
     isDoubleTapLongPress.current = false;
     setTouchStart(null);
-  }, []);
+  }, [onLongPressEnd, onDoubleTapLongPressEnd]);
 
   return {
     onTouchStart: handleTouchStart,

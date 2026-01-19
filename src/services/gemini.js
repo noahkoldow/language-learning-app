@@ -4,18 +4,59 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 let genAI;
-let model;
+let models = [];
+
+// Model priority list: try newest first, fallback to older models
+const MODEL_PRIORITY = [
+  'gemini-2.0-flash',
+  'gemini-2.0-flash-exp',
+  'gemini-1.5-flash',
+  'gemini-1.5-pro',
+];
 
 // Only initialize if API key is available
 if (API_KEY && API_KEY.trim() !== '') {
   try {
     genAI = new GoogleGenerativeAI(API_KEY);
-    // Updated to use the current model name (gemini-1.5-flash is newer and more reliable)
-    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    // Initialize all models in priority order
+    models = MODEL_PRIORITY.map(modelName => ({
+      name: modelName,
+      instance: genAI.getGenerativeModel({ model: modelName }),
+    }));
   } catch {
     // Silent failure - will use fallback services
-    model = null;
+    models = [];
   }
+}
+
+/**
+ * Helper function to try API call with multiple model fallbacks
+ * @param {Function} apiCall - Function that takes a model and returns a promise
+ * @returns {Promise<string>} - Result from successful model
+ */
+async function tryWithModelFallback(apiCall) {
+  if (!models || models.length === 0) {
+    throw new Error('Gemini API not available');
+  }
+
+  let lastError = null;
+  
+  // Try each model in order
+  for (const { name, instance } of models) {
+    try {
+      console.log(`Trying Gemini model: ${name}`);
+      const result = await apiCall(instance);
+      console.log(`Successfully used model: ${name}`);
+      return result;
+    } catch (error) {
+      console.warn(`Model ${name} failed:`, error.message);
+      lastError = error;
+      // Continue to next model
+    }
+  }
+  
+  // All models failed
+  throw new Error(`All Gemini models failed. Last error: ${lastError?.message}`);
 }
 
 /**
@@ -32,10 +73,6 @@ export async function translateWithStructure(
   cefrLevel = 'B2',
   sourceLanguage = 'auto'
 ) {
-  if (!model) {
-    throw new Error('Gemini API not available');
-  }
-
   const prompt = `You are a language learning assistant. Translate the following text to ${targetLanguage} at CEFR level ${cefrLevel}.
 
 CRITICAL REQUIREMENTS:
@@ -51,13 +88,11 @@ ${sourceLanguage !== 'auto' ? `Source language: ${sourceLanguage}` : ''}
 Text to translate:
 ${text}`;
 
-  try {
+  return tryWithModelFallback(async (model) => {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();
-  } catch (error) {
-    throw new Error(`Gemini translation failed: ${error.message}`);
-  }
+  });
 }
 
 /**
@@ -68,10 +103,6 @@ ${text}`;
  * @returns {Promise<string>} - Translated word with brief explanation
  */
 export async function translateWord(word, targetLanguage, context = '') {
-  if (!model) {
-    throw new Error('Gemini API not available');
-  }
-
   const prompt = `Translate the word "${word}" to ${targetLanguage}.
 ${context ? `Context: "${context}"` : ''}
 
@@ -84,13 +115,11 @@ Example: "casa - house, home"
 
 Keep it concise.`;
 
-  try {
+  return tryWithModelFallback(async (model) => {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();
-  } catch (error) {
-    throw new Error(`Gemini word translation failed: ${error.message}`);
-  }
+  });
 }
 
 /**
@@ -101,10 +130,6 @@ Keep it concise.`;
  * @returns {Promise<string>} - Simplified text
  */
 export async function simplifyText(text, language, targetLevel) {
-  if (!model) {
-    throw new Error('Gemini API not available');
-  }
-
   const prompt = `You are a language learning assistant. Simplify the following ${language} text to CEFR level ${targetLevel}.
 
 CRITICAL REQUIREMENTS:
@@ -118,13 +143,11 @@ CRITICAL REQUIREMENTS:
 Text to simplify:
 ${text}`;
 
-  try {
+  return tryWithModelFallback(async (model) => {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();
-  } catch (error) {
-    throw new Error(`Gemini simplification failed: ${error.message}`);
-  }
+  });
 }
 
 export default {
