@@ -164,4 +164,77 @@ export function useFirestore(collectionName) {
   };
 }
 
+/**
+ * Hook for managing text language preferences in Firestore
+ * @param {string} userId - Current user ID
+ * @returns {object} - Functions for managing text language preferences
+ */
+export function useTextLanguagePreferences(userId) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  /**
+   * Save text language preference to Firestore
+   * @param {string} textId - Text ID
+   * @param {string} languageCode - Language code
+   */
+  const saveTextLanguage = useCallback(async (textId, languageCode) => {
+    if (!db || !userId) {
+      console.warn('Firestore not initialized or no user ID');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const docRef = doc(db, 'users', userId, 'texts', textId);
+      await setDoc(docRef, { targetLanguage: languageCode }, { merge: true });
+    } catch (err) {
+      setError(err.message);
+      console.error('Failed to save text language preference:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]);
+
+  /**
+   * Load text language preference from Firestore
+   * @param {string} textId - Text ID
+   * @returns {string|null} - Language code or null
+   */
+  const loadTextLanguage = useCallback(async (textId) => {
+    if (!db || !userId) {
+      console.warn('Firestore not initialized or no user ID');
+      return null;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const docRef = doc(db, 'users', userId, 'texts', textId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        return docSnap.data()?.targetLanguage || null;
+      }
+      return null;
+    } catch (err) {
+      setError(err.message);
+      console.error('Failed to load text language preference:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]);
+
+  return {
+    saveTextLanguage,
+    loadTextLanguage,
+    loading,
+    error,
+  };
+}
+
 export default useFirestore;

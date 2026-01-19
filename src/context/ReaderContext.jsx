@@ -1,8 +1,29 @@
 // Reader Context Provider
 import { createContext, useContext, useState, useCallback } from 'react';
 import { splitTextIntoPages } from '../utils/textProcessing';
+import { getLanguageCode } from '../utils/languages';
 
 const ReaderContext = createContext(null);
+
+// Helper functions for localStorage
+const STORAGE_KEY_PREFIX = 'text_language_';
+
+const saveTextLanguageToStorage = (textId, languageCode) => {
+  try {
+    localStorage.setItem(`${STORAGE_KEY_PREFIX}${textId}`, languageCode);
+  } catch (error) {
+    console.error('Failed to save text language to localStorage:', error);
+  }
+};
+
+const getTextLanguageFromStorage = (textId) => {
+  try {
+    return localStorage.getItem(`${STORAGE_KEY_PREFIX}${textId}`);
+  } catch (error) {
+    console.error('Failed to get text language from localStorage:', error);
+    return null;
+  }
+};
 
 export function ReaderProvider({ children }) {
   const [currentText, setCurrentText] = useState(null);
@@ -12,6 +33,7 @@ export function ReaderProvider({ children }) {
   const [translatedPages, setTranslatedPages] = useState(new Map());
   const [targetLanguage, setTargetLanguage] = useState('English');
   const [nativeLanguage, setNativeLanguage] = useState('German');
+  const [textLanguagePreferences, setTextLanguagePreferences] = useState({});
 
   const loadText = useCallback((text, metadata = {}) => {
     const textPages = splitTextIntoPages(text);
@@ -59,6 +81,37 @@ export function ReaderProvider({ children }) {
     setTranslatedPages(new Map());
   }, []);
 
+  // Get the target language for a specific text
+  const getTextTargetLanguage = useCallback((textId) => {
+    // First check in-memory preferences
+    if (textLanguagePreferences[textId]) {
+      return textLanguagePreferences[textId];
+    }
+    
+    // Then check localStorage
+    const storedLanguage = getTextLanguageFromStorage(textId);
+    if (storedLanguage) {
+      return storedLanguage;
+    }
+    
+    // Default to the global target language
+    // Convert language name to code if needed
+    const defaultCode = getLanguageCode(targetLanguage);
+    return defaultCode || 'en';
+  }, [textLanguagePreferences, targetLanguage]);
+
+  // Update the target language for a specific text
+  const updateTextTargetLanguage = useCallback((textId, languageCode) => {
+    // Save to in-memory state
+    setTextLanguagePreferences(prev => ({
+      ...prev,
+      [textId]: languageCode,
+    }));
+    
+    // Save to localStorage as fallback
+    saveTextLanguageToStorage(textId, languageCode);
+  }, []);
+
   const value = {
     currentText,
     currentPage,
@@ -67,6 +120,7 @@ export function ReaderProvider({ children }) {
     targetLanguage,
     nativeLanguage,
     totalPages: pages.length,
+    textLanguagePreferences,
     loadText,
     nextPage,
     previousPage,
@@ -77,6 +131,8 @@ export function ReaderProvider({ children }) {
     setTargetLanguage,
     setNativeLanguage,
     clearReader,
+    getTextTargetLanguage,
+    updateTextTargetLanguage,
   };
 
   return (

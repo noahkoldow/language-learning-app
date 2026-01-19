@@ -1,8 +1,11 @@
 // Text Library Component
 import { useNavigate } from 'react-router-dom';
 import { useReaderContext } from '../../context/ReaderContext';
+import { useAuthContext } from '../../context/AuthContext';
+import { useTextLanguagePreferences } from '../../hooks/useFirestore';
 import { Card } from '../UI/Card';
 import { Button } from '../UI/Button';
+import { LanguageSelector } from '../UI/LanguageSelector';
 
 // Sample texts for demonstration
 const SAMPLE_TEXTS = [
@@ -49,16 +52,40 @@ Ein charakteristisches Merkmal des Deutschen ist die Möglichkeit, durch Komposi
 
 export function TextLibrary() {
   const navigate = useNavigate();
-  const { loadText } = useReaderContext();
+  const { loadText, setTargetLanguage, getTextTargetLanguage, updateTextTargetLanguage } = useReaderContext();
+  const { user } = useAuthContext();
+  const { saveTextLanguage } = useTextLanguagePreferences(user?.uid);
 
   const handleSelectText = (text) => {
+    // Get the target language for this specific text
+    const textTargetLanguage = getTextTargetLanguage(text.id);
+    
     loadText(text.fullText, {
       title: text.title,
       author: text.author,
       language: text.language,
       level: text.level,
     });
+    
+    // Set the target language for the reader
+    setTargetLanguage(textTargetLanguage);
+    
     navigate('/reader');
+  };
+
+  const handleLanguageChange = async (textId, languageCode) => {
+    // Update in context (which also saves to localStorage)
+    updateTextTargetLanguage(textId, languageCode);
+    
+    // Also try to save to Firestore if user is authenticated
+    if (user?.uid) {
+      try {
+        await saveTextLanguage(textId, languageCode);
+      } catch (error) {
+        console.error('Failed to save to Firestore:', error);
+        // Language is still saved in localStorage, so we don't show error to user
+      }
+    }
   };
 
   return (
@@ -66,41 +93,53 @@ export function TextLibrary() {
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Text Library</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {SAMPLE_TEXTS.map((text) => (
-          <Card key={text.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {text.title}
-              </h3>
-              <p className="text-sm text-gray-600 mb-2">by {text.author}</p>
-              
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-xs bg-primary-100 text-primary-800 px-2 py-1 rounded">
-                  {text.language}
-                </span>
-                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                  {text.level}
-                </span>
+        {SAMPLE_TEXTS.map((text) => {
+          const textTargetLanguage = getTextTargetLanguage(text.id);
+          
+          return (
+            <Card key={text.id} className="hover:shadow-lg transition-shadow">
+              <div className="flex flex-col h-full">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {text.title}
+                </h3>
+                <p className="text-sm text-gray-600 mb-2">by {text.author}</p>
+                
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs bg-primary-100 text-primary-800 px-2 py-1 rounded">
+                    {text.language}
+                  </span>
+                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                    {text.level}
+                  </span>
+                </div>
+                
+                <p className="text-sm text-gray-700 line-clamp-3 mb-4">
+                  {text.excerpt}
+                </p>
+                
+                <div className="mt-auto space-y-3">
+                  <LanguageSelector
+                    selectedLanguage={textTargetLanguage}
+                    onChange={(lang) => handleLanguageChange(text.id, lang)}
+                    label="Übersetzen nach"
+                  />
+                  
+                  <Button 
+                    variant="primary" 
+                    size="sm"
+                    className="w-full"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelectText(text);
+                    }}
+                  >
+                    Lesen
+                  </Button>
+                </div>
               </div>
-              
-              <p className="text-sm text-gray-700 line-clamp-3 mb-4">
-                {text.excerpt}
-              </p>
-              
-              <Button 
-                variant="primary" 
-                size="sm"
-                className="w-full"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleSelectText(text);
-                }}
-              >
-                Read
-              </Button>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
