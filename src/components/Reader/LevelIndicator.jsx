@@ -84,15 +84,23 @@ export function LevelIndicator() {
           <div className="absolute top-full left-0 mt-1 bg-white border-2 border-gray-200 rounded-lg shadow-lg z-50 min-w-[180px]">
             {availableLevels.map((level) => {
               const info = getLevelInfo(level);
+              const isSelected = level === currentLevel;
+              const isFirst = level === availableLevels[0];
+              const isLast = level === availableLevels[availableLevels.length - 1];
+              
+              // Build className
+              const buttonClass = [
+                'w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors',
+                isSelected && 'bg-primary-50 font-semibold',
+                isFirst && 'rounded-t-lg',
+                isLast && 'rounded-b-lg'
+              ].filter(Boolean).join(' ');
+              
               return (
                 <button
                   key={level}
                   onClick={() => handleLevelSelect(level)}
-                  className={`w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors ${
-                    level === currentLevel ? 'bg-primary-50 font-semibold' : ''
-                  } ${level === availableLevels[0] ? 'rounded-t-lg' : ''} ${
-                    level === availableLevels[availableLevels.length - 1] ? 'rounded-b-lg' : ''
-                  }`}
+                  className={buttonClass}
                 >
                   <span className="font-semibold">{info.code}</span>
                   <span className="ml-2 text-sm text-gray-600">{info.name}</span>

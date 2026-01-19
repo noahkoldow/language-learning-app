@@ -84,7 +84,7 @@ export function PdfUpload() {
             
             <div className="mt-4">
               <label htmlFor="file-upload" className="cursor-pointer">
-                <Button as="span" variant="primary" className="bg-primary-600 hover:bg-primary-700">
+                <Button as="span" variant="primary">
                   Select PDF File
                 </Button>
                 <input
