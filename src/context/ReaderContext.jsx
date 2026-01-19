@@ -85,12 +85,23 @@ export function ReaderProvider({ children }) {
       return stored;
     }
     // Default to targetLanguage context or 'de'
-    return targetLanguage.toLowerCase().startsWith('german') ? 'de' : 
-           targetLanguage.toLowerCase().startsWith('english') ? 'en' :
-           targetLanguage.toLowerCase().startsWith('french') ? 'fr' :
-           targetLanguage.toLowerCase().startsWith('spanish') ? 'es' :
-           targetLanguage.toLowerCase().startsWith('italian') ? 'it' :
-           'de';
+    const langMap = {
+      'german': 'de',
+      'english': 'en',
+      'french': 'fr',
+      'spanish': 'es',
+      'italian': 'it',
+      'portuguese': 'pt',
+      'dutch': 'nl',
+      'polish': 'pl'
+    };
+    const targetLower = targetLanguage.toLowerCase();
+    for (const [name, code] of Object.entries(langMap)) {
+      if (targetLower.startsWith(name)) {
+        return code;
+      }
+    }
+    return 'de';
   }, [targetLanguage]);
 
   const setTextTargetLanguage = useCallback((textId, languageCode) => {
