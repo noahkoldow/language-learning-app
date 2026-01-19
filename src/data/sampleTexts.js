@@ -22,6 +22,23 @@ export const sampleTexts = [
     ],
   },
   {
+    id: 'alice-wonderland-en',
+    title: 'Alice in Wonderland',
+    author: 'Lewis Carroll',
+    language: 'en',
+    description: 'Alice falls down a rabbit hole and discovers a fantasy world.',
+    targetLanguage: 'de',
+    pages: [
+      "Alice was beginning to get very tired of sitting by her sister on the bank, and of having nothing to do. Once or twice she had peeped into the book her sister was reading, but it had no pictures or conversations in it.",
+      
+      "So she was considering in her own mind whether the pleasure of making a daisy-chain would be worth the trouble of getting up and picking the daisies, when suddenly a White Rabbit with pink eyes ran close by her.",
+      
+      "There was nothing so very remarkable in that. Nor did Alice think it so very much out of the way to hear the Rabbit say to itself, 'Oh dear! Oh dear! I shall be too late!' But when the Rabbit actually took a watch out of its waistcoat-pocket, and looked at it, and then hurried on, Alice started to her feet.",
+      
+      "It flashed across her mind that she had never before seen a rabbit with either a waistcoat-pocket, or a watch to take out of it. Burning with curiosity, she ran across the field after it, and was just in time to see it pop down a large rabbit-hole under the hedge."
+    ],
+  },
+  {
     id: 'petit-prince-fr',
     title: 'Le Petit Prince',
     author: 'Antoine de Saint-Exupéry',
@@ -39,6 +56,23 @@ export const sampleTexts = [
     ],
   },
   {
+    id: 'les-miserables-fr',
+    title: 'Les Misérables',
+    author: 'Victor Hugo',
+    language: 'fr',
+    description: 'L\'histoire de Jean Valjean, un ancien bagnard qui cherche la rédemption.',
+    targetLanguage: 'de',
+    pages: [
+      "En 1815, M. Charles-François-Bienvenu Myriel était évêque de Digne. C'était un vieillard d'environ soixante-quinze ans; il occupait le siège de Digne depuis 1806.",
+      
+      "Quoique ce détail ne touche en aucune manière au fond même de ce que nous avons à raconter, il n'est peut-être pas inutile, ne fût-ce que pour être exact en tout, d'indiquer ici les bruits et les propos qui avaient couru sur son compte au moment où il était arrivé dans le diocèse.",
+      
+      "Vrai ou faux, ce qu'on dit des hommes tient souvent autant de place dans leur vie et surtout dans leur destinée que ce qu'ils font. M. Myriel était fils d'un conseiller au parlement d'Aix.",
+      
+      "De cette noblesse de robe, on contait de lui qu'attendant son père dans l'hérédité de sa charge, il s'était marié fort jeune, à dix-huit ou vingt ans, suivant un usage assez répandu dans les familles parlementaires."
+    ],
+  },
+  {
     id: 'kleiner-prinz-de',
     title: 'Der kleine Prinz',
     author: 'Antoine de Saint-Exupéry',
@@ -53,6 +87,23 @@ export const sampleTexts = [
       "Sie haben mir geantwortet: 'Warum sollte uns ein Hut Angst machen?' Mein Bild stellte aber keinen Hut dar. Es stellte eine Riesenschlange dar, die einen Elefanten verdaut. Ich zeichnete also das Innere der Riesenschlange, damit es die großen Leute verstehen konnten. Sie brauchen ja immer Erklärungen.",
       
       "Die großen Leute haben mir geraten, mit den Zeichnungen von offenen oder geschlossenen Riesenschlangen aufzuhören und mich lieber für Geografie, Geschichte, Rechnen und Grammatik zu interessieren. So kam es, dass ich mit sechs Jahren eine großartige Karriere als Maler aufgab."
+    ],
+  },
+  {
+    id: 'faust-de',
+    title: 'Faust',
+    author: 'Johann Wolfgang von Goethe',
+    language: 'de',
+    description: 'Die tragische Geschichte des Doktor Faustus und seines Pakts mit Mephistopheles.',
+    targetLanguage: 'en',
+    pages: [
+      "Habe nun, ach! Philosophie, Juristerei und Medizin, und leider auch Theologie durchaus studiert, mit heißem Bemühn. Da steh ich nun, ich armer Tor! Und bin so klug als wie zuvor.",
+      
+      "Heiße Magister, heiße Doktor gar, und ziehe schon an die zehen Jahr herauf, herab und quer und krumm meine Schüler an der Nase herum – und sehe, dass wir nichts wissen können!",
+      
+      "Das will mir schier das Herz verbrennen. Zwar bin ich gescheiter als all die Laffen, Doktoren, Magister, Schreiber und Pfaffen; mich plagen keine Skrupel noch Zweifel, fürchte mich weder vor Hölle noch Teufel.",
+      
+      "Dafür ist mir auch alle Freud entrissen, bilde mir nicht ein, was Rechts zu wissen, bilde mir nicht ein, ich könnte was lehren, die Menschen zu bessern und zu bekehren."
     ],
   },
 ];

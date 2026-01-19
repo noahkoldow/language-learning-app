@@ -6,12 +6,14 @@ import { useReaderContext } from '../../context/ReaderContext';
 import { Card } from '../UI/Card';
 import { Button } from '../UI/Button';
 import { Loading } from '../UI/Loading';
+import { LanguageSelector } from '../UI/LanguageSelector';
 
 export function PdfUpload() {
   const navigate = useNavigate();
-  const { loadText } = useReaderContext();
+  const { loadText, setTargetLanguage } = useReaderContext();
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedLanguage, setSelectedLanguage] = useState('de');
 
   const handleFileSelect = async (event) => {
     const file = event.target.files?.[0];
@@ -33,6 +35,9 @@ export function PdfUpload() {
         throw new Error('No text found in PDF');
       }
 
+      // Set the target language before loading text
+      setTargetLanguage(selectedLanguage);
+
       loadText(text, {
         title: file.name.replace('.pdf', ''),
         source: 'upload',
@@ -49,6 +54,13 @@ export function PdfUpload() {
   return (
     <Card className="max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold text-gray-900 mb-4">Upload PDF</h2>
+      
+      <LanguageSelector
+        selectedLanguage={selectedLanguage}
+        onChange={setSelectedLanguage}
+        label="Translate to"
+        className="mb-6"
+      />
       
       <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-500 transition-colors">
         {isUploading ? (
@@ -72,7 +84,7 @@ export function PdfUpload() {
             
             <div className="mt-4">
               <label htmlFor="file-upload" className="cursor-pointer">
-                <Button as="span" variant="primary">
+                <Button as="span" variant="primary" className="bg-primary-600 hover:bg-primary-700">
                   Select PDF File
                 </Button>
                 <input
