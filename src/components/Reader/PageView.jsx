@@ -25,6 +25,14 @@ export function PageView() {
   const [wordPopup, setWordPopup] = useState(null);
   const [showFallbackNotice, setShowFallbackNotice] = useState(false);
 
+  // Helper to show fallback notice
+  const showFallbackNotification = () => {
+    if (currentProvider !== API_PROVIDERS.GEMINI) {
+      setShowFallbackNotice(true);
+      setTimeout(() => setShowFallbackNotice(false), 3000);
+    }
+  };
+
   useEffect(() => {
     // Load current page
     if (pages[currentPage]) {
@@ -50,12 +58,7 @@ export function PageView() {
         setDisplayText(simplified);
         cacheTranslatedPage(currentPage, newLevel, simplified);
         updateLevel(newLevel);
-        
-        // Show notice if using fallback
-        if (currentProvider !== API_PROVIDERS.GEMINI) {
-          setShowFallbackNotice(true);
-          setTimeout(() => setShowFallbackNotice(false), 3000);
-        }
+        showFallbackNotification();
       } catch (error) {
         console.error('Simplification error:', error);
         // Don't show error to user, fallback should have been applied
@@ -73,12 +76,7 @@ export function PageView() {
         setDisplayText(simplified);
         cacheTranslatedPage(currentPage, newLevel, simplified);
         updateLevel(newLevel);
-        
-        // Show notice if using fallback
-        if (currentProvider !== API_PROVIDERS.GEMINI) {
-          setShowFallbackNotice(true);
-          setTimeout(() => setShowFallbackNotice(false), 3000);
-        }
+        showFallbackNotification();
       } catch (error) {
         console.error('Simplification error:', error);
         // Don't show error to user, fallback should have been applied
