@@ -48,27 +48,35 @@ export function PageView() {
         pageNum => pageNum >= 0 && pageNum < pages.length
       );
       
-      for (const pageNum of pagesToLoad) {
+      // Only pre-load if base level is different from original
+      if (baseLevel === currentText.level) {
+        console.log('Base level matches original level, skipping pre-load');
+        return;
+      }
+      
+      // Prepare promises for parallel loading
+      const loadPromises = pagesToLoad.map(async (pageNum) => {
         // Skip if already cached
         const cached = getTranslatedPage(pageNum, baseLevel);
         if (cached) {
           console.log(`Page ${pageNum} already cached at level ${baseLevel}`);
-          continue;
+          return null;
         }
         
-        // Only pre-load if base level is different from original
-        if (baseLevel !== currentText.level) {
-          try {
-            console.log(`Pre-loading page ${pageNum} at level ${baseLevel}`);
-            const simplified = await simplify(pages[pageNum], currentText.language, baseLevel);
-            cacheTranslatedPage(pageNum, baseLevel, simplified);
-            console.log(`Successfully pre-loaded page ${pageNum}`);
-          } catch (error) {
-            console.warn(`Failed to pre-load page ${pageNum}:`, error.message);
-            // Continue with other pages even if one fails
-          }
+        try {
+          console.log(`Pre-loading page ${pageNum} at level ${baseLevel}`);
+          const simplified = await simplify(pages[pageNum], currentText.language, baseLevel);
+          cacheTranslatedPage(pageNum, baseLevel, simplified);
+          console.log(`Successfully pre-loaded page ${pageNum}`);
+          return pageNum;
+        } catch (error) {
+          console.warn(`Failed to pre-load page ${pageNum}:`, error.message);
+          return null;
         }
-      }
+      });
+      
+      // Execute all pre-loads in parallel
+      await Promise.allSettled(loadPromises);
     } finally {
       setIsPreloading(false);
     }
