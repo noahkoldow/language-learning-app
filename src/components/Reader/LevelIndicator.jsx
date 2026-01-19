@@ -5,7 +5,7 @@ import { getLevelInfo, CEFR_LEVEL_CODES } from '../../utils/cefrLevels';
 import { useTranslation } from '../../hooks/useTranslation';
 
 export function LevelIndicator() {
-  const { currentLevel, updateLevel, currentText } = useReaderContext();
+  const { currentLevel, updateBaseLevel, currentText } = useReaderContext();
   const { currentProvider, API_PROVIDERS } = useTranslation();
   const levelInfo = getLevelInfo(currentLevel);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -33,7 +33,7 @@ export function LevelIndicator() {
   }, [isDropdownOpen]);
 
   const handleLevelSelect = (level) => {
-    updateLevel(level);
+    updateBaseLevel(level);
     setIsDropdownOpen(false);
   };
 

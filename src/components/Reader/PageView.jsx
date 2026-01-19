@@ -1,5 +1,5 @@
 // Page View Component with Gesture Support
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useGestures } from '../../hooks/useGestures';
 import { useReaderContext } from '../../context/ReaderContext';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -12,7 +12,8 @@ export function PageView() {
     pages, 
     currentPage, 
     currentLevel,
-    targetLanguage,
+    currentText,
+    baseLevel,
     nextPage, 
     previousPage,
     updateLevel,
@@ -24,6 +25,7 @@ export function PageView() {
   const [displayText, setDisplayText] = useState('');
   const [wordPopup, setWordPopup] = useState(null);
   const [showFallbackNotice, setShowFallbackNotice] = useState(false);
+  const [isPreloading, setIsPreloading] = useState(false);
 
   // Helper to show fallback notice
   const showFallbackNotification = () => {
@@ -32,6 +34,60 @@ export function PageView() {
       setTimeout(() => setShowFallbackNotice(false), 3000);
     }
   };
+
+  // Pre-load current page and next 2 pages at the base level
+  const preloadPages = useCallback(async () => {
+    if (!currentText?.language || !baseLevel) return;
+    
+    console.log('Pre-loading pages at base level:', baseLevel);
+    setIsPreloading(true);
+    
+    try {
+      // Pre-load current page and next 2 pages (ensure pageNum >= 0 and < pages.length)
+      const pagesToLoad = [currentPage, currentPage + 1, currentPage + 2].filter(
+        pageNum => pageNum >= 0 && pageNum < pages.length
+      );
+      
+      // Only pre-load if base level is different from original
+      if (baseLevel === currentText.level) {
+        console.log('Base level matches original level, skipping pre-load');
+        return;
+      }
+      
+      // Prepare promises for parallel loading
+      const loadPromises = pagesToLoad.map(async (pageNum) => {
+        // Skip if already cached
+        const cached = getTranslatedPage(pageNum, baseLevel);
+        if (cached) {
+          console.log(`Page ${pageNum} already cached at level ${baseLevel}`);
+          return null;
+        }
+        
+        try {
+          console.log(`Pre-loading page ${pageNum} at level ${baseLevel}`);
+          const simplified = await simplify(pages[pageNum], currentText.language, baseLevel);
+          cacheTranslatedPage(pageNum, baseLevel, simplified);
+          console.log(`Successfully pre-loaded page ${pageNum}`);
+          return pageNum;
+        } catch (error) {
+          console.warn(`Failed to pre-load page ${pageNum}:`, error.message);
+          return null;
+        }
+      });
+      
+      // Execute all pre-loads in parallel
+      await Promise.allSettled(loadPromises);
+    } finally {
+      setIsPreloading(false);
+    }
+  }, [currentPage, currentText, baseLevel, pages, getTranslatedPage, cacheTranslatedPage, simplify]);
+
+  // Pre-load pages when text loads, page changes, or base level changes
+  useEffect(() => {
+    if (pages.length > 0 && currentText) {
+      preloadPages();
+    }
+  }, [currentPage, baseLevel, pages.length, currentText, preloadPages]);
 
   useEffect(() => {
     // Load current page
@@ -58,12 +114,12 @@ export function PageView() {
     console.log('Current page:', currentPage);
     console.log('Current level:', currentLevel);
     console.log('Target level:', newLevel);
-    console.log('Target language:', targetLanguage);
+    console.log('Source language:', currentText?.language);
     
-    if (newLevel && pages[currentPage]) {
+    if (newLevel && pages[currentPage] && currentText?.language) {
       try {
         console.log('Calling simplify API...');
-        const simplified = await simplify(pages[currentPage], targetLanguage, newLevel);
+        const simplified = await simplify(pages[currentPage], currentText.language, newLevel);
         console.log('API response received:', simplified.substring(0, 50) + '...');
         setDisplayText(simplified);
         cacheTranslatedPage(currentPage, newLevel, simplified);
@@ -84,12 +140,12 @@ export function PageView() {
     console.log('Current page:', currentPage);
     console.log('Current level:', currentLevel);
     console.log('Target level:', newLevel);
-    console.log('Target language:', targetLanguage);
+    console.log('Source language:', currentText?.language);
     
-    if (newLevel && pages[currentPage]) {
+    if (newLevel && pages[currentPage] && currentText?.language) {
       try {
         console.log('Calling simplify API...');
-        const simplified = await simplify(pages[currentPage], targetLanguage, newLevel);
+        const simplified = await simplify(pages[currentPage], currentText.language, newLevel);
         console.log('API response received:', simplified.substring(0, 50) + '...');
         setDisplayText(simplified);
         cacheTranslatedPage(currentPage, newLevel, simplified);
@@ -135,6 +191,19 @@ export function PageView() {
 
   return (
     <div className="relative">
+      {/* Pre-loading indicator */}
+      {isPreloading && (
+        <div className="fixed top-4 left-4 z-50 bg-green-100 border border-green-400 text-green-800 px-4 py-2 rounded shadow-lg animate-fade-in">
+          <div className="flex items-center text-sm">
+            <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Pre-loading pages...</span>
+          </div>
+        </div>
+      )}
+      
       {/* Fallback Notice Toast */}
       {showFallbackNotice && (
         <div className="fixed top-4 right-4 z-50 bg-blue-100 border border-blue-400 text-blue-800 px-4 py-3 rounded shadow-lg animate-fade-in">

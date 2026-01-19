@@ -8,6 +8,7 @@ export function ReaderProvider({ children }) {
   const [currentText, setCurrentText] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [currentLevel, setCurrentLevel] = useState('B2');
+  const [baseLevel, setBaseLevel] = useState('B2'); // Base level set by user
   const [pages, setPages] = useState([]);
   const [translatedPages, setTranslatedPages] = useState(new Map());
   const [targetLanguage, setTargetLanguage] = useState('English');
@@ -71,12 +72,18 @@ export function ReaderProvider({ children }) {
     setCurrentLevel(newLevel);
   }, []);
 
+  const updateBaseLevel = useCallback((newLevel) => {
+    setBaseLevel(newLevel);
+    setCurrentLevel(newLevel);
+  }, []);
+
   const clearReader = useCallback(() => {
     setCurrentText(null);
     setCurrentPage(0);
     setPages([]);
     setTranslatedPages(new Map());
-  }, []);
+    setCurrentLevel(baseLevel); // Reset to base level
+  }, [baseLevel]);
 
   // Language preference management per text
   const getTextTargetLanguage = useCallback((textId) => {
@@ -112,6 +119,7 @@ export function ReaderProvider({ children }) {
     currentText,
     currentPage,
     currentLevel,
+    baseLevel,
     pages,
     targetLanguage,
     nativeLanguage,
@@ -123,6 +131,7 @@ export function ReaderProvider({ children }) {
     cacheTranslatedPage,
     getTranslatedPage,
     updateLevel,
+    updateBaseLevel,
     setTargetLanguage,
     setNativeLanguage,
     clearReader,
