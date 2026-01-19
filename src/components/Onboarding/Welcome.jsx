@@ -1,8 +1,7 @@
 // Welcome Screen Component
-import { Button } from '../UI/Button';
 import { Card } from '../UI/Card';
 
-export function Welcome({ onNext }) {
+export function Welcome() {
   return (
     <Card className="max-w-2xl mx-auto text-center">
       <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -38,10 +37,6 @@ export function Welcome({ onNext }) {
           </p>
         </div>
       </div>
-
-      <Button onClick={onNext} size="lg" className="px-8">
-        Get Started
-      </Button>
     </Card>
   );
 }
