@@ -32,9 +32,10 @@ if (API_KEY && API_KEY.trim() !== '') {
 /**
  * Helper function to try API call with multiple model fallbacks
  * @param {Function} apiCall - Function that takes a model and returns a promise
+ * @param {string} operationType - Type of operation for error context
  * @returns {Promise<string>} - Result from successful model
  */
-async function tryWithModelFallback(apiCall) {
+async function tryWithModelFallback(apiCall, operationType = 'API call') {
   if (!models || models.length === 0) {
     throw new Error('Gemini API not available');
   }
@@ -44,19 +45,19 @@ async function tryWithModelFallback(apiCall) {
   // Try each model in order
   for (const { name, instance } of models) {
     try {
-      console.log(`Trying Gemini model: ${name}`);
+      console.log(`Trying Gemini model: ${name} for ${operationType}`);
       const result = await apiCall(instance);
-      console.log(`Successfully used model: ${name}`);
+      console.log(`Successfully used model: ${name} for ${operationType}`);
       return result;
     } catch (error) {
-      console.warn(`Model ${name} failed:`, error.message);
+      console.warn(`Model ${name} failed for ${operationType}:`, error.message);
       lastError = error;
       // Continue to next model
     }
   }
   
   // All models failed
-  throw new Error(`All Gemini models failed. Last error: ${lastError?.message}`);
+  throw new Error(`Gemini ${operationType} failed: All models failed. Last error: ${lastError?.message}`);
 }
 
 /**
@@ -92,7 +93,7 @@ ${text}`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();
-  });
+  }, 'translation');
 }
 
 /**
@@ -119,7 +120,7 @@ Keep it concise.`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();
-  });
+  }, 'word translation');
 }
 
 /**
@@ -147,7 +148,7 @@ ${text}`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();
-  });
+  }, 'simplification');
 }
 
 export default {

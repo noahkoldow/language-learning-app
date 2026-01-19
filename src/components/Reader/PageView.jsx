@@ -90,6 +90,26 @@ export function PageView() {
     }
   }, [currentPage, baseLevel, pages.length, currentText, preloadPages]);
 
+  // Helper function to restore original level after hold gesture
+  const restoreOriginalLevel = useCallback(() => {
+    if (levelBeforeHold) {
+      console.log('Restoring level from:', currentLevel, 'to:', levelBeforeHold);
+      
+      // Check if we have a cached version at the original level
+      const cached = getTranslatedPage(currentPage, levelBeforeHold);
+      if (cached) {
+        console.log('Using cached version at level:', levelBeforeHold);
+        setDisplayText(cached);
+      } else {
+        console.log('Loading original page');
+        setDisplayText(pages[currentPage]);
+      }
+      
+      updateLevel(levelBeforeHold);
+      setLevelBeforeHold(null);
+    }
+  }, [levelBeforeHold, currentLevel, currentPage, getTranslatedPage, pages, updateLevel]);
+
   useEffect(() => {
     // Load current page
     if (pages[currentPage]) {
@@ -137,26 +157,9 @@ export function PageView() {
     }
   };
 
-  const handleLongPressEnd = async () => {
+  const handleLongPressEnd = () => {
     console.log('Long press ended - Restoring original level');
-    
-    // Restore the level that was active before the hold
-    if (levelBeforeHold) {
-      console.log('Restoring level from:', currentLevel, 'to:', levelBeforeHold);
-      
-      // Check if we have a cached version at the original level
-      const cached = getTranslatedPage(currentPage, levelBeforeHold);
-      if (cached) {
-        console.log('Using cached version at level:', levelBeforeHold);
-        setDisplayText(cached);
-      } else {
-        console.log('Loading original page');
-        setDisplayText(pages[currentPage]);
-      }
-      
-      updateLevel(levelBeforeHold);
-      setLevelBeforeHold(null);
-    }
+    restoreOriginalLevel();
   };
 
   const handleDoubleTapLongPress = async (e) => {
@@ -189,26 +192,9 @@ export function PageView() {
     }
   };
 
-  const handleDoubleTapLongPressEnd = async () => {
+  const handleDoubleTapLongPressEnd = () => {
     console.log('Double tap long press ended - Restoring original level');
-    
-    // Restore the level that was active before the hold
-    if (levelBeforeHold) {
-      console.log('Restoring level from:', currentLevel, 'to:', levelBeforeHold);
-      
-      // Check if we have a cached version at the original level
-      const cached = getTranslatedPage(currentPage, levelBeforeHold);
-      if (cached) {
-        console.log('Using cached version at level:', levelBeforeHold);
-        setDisplayText(cached);
-      } else {
-        console.log('Loading original page');
-        setDisplayText(pages[currentPage]);
-      }
-      
-      updateLevel(levelBeforeHold);
-      setLevelBeforeHold(null);
-    }
+    restoreOriginalLevel();
   };
 
   const handleWordTap = (e, range) => {
