@@ -1,5 +1,4 @@
 // Language Selection Component
-import { useState } from 'react';
 import { Card } from '../UI/Card';
 
 const LANGUAGES = [
@@ -14,17 +13,15 @@ const LANGUAGES = [
 ];
 
 export function LanguageSelect({ userData, updateUserData }) {
-  const [nativeLanguage, setNativeLanguage] = useState(userData.nativeLanguage || '');
-  const [targetLanguage, setTargetLanguage] = useState(userData.targetLanguage || '');
+  const nativeLanguage = userData.nativeLanguage || '';
+  const targetLanguage = userData.targetLanguage || '';
 
   const handleNativeLanguageChange = (lang) => {
-    setNativeLanguage(lang);
-    updateUserData({ nativeLanguage: lang, targetLanguage });
+    updateUserData({ nativeLanguage: lang });
   };
 
   const handleTargetLanguageChange = (lang) => {
-    setTargetLanguage(lang);
-    updateUserData({ nativeLanguage, targetLanguage: lang });
+    updateUserData({ targetLanguage: lang });
   };
 
   return (

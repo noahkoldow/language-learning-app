@@ -1,13 +1,11 @@
 // CEFR Level Assessment Component
-import { useState } from 'react';
 import { Card } from '../UI/Card';
 import { CEFR_LEVELS } from '../../utils/cefrLevels';
 
 export function LevelAssessment({ userData, updateUserData }) {
-  const [selectedLevel, setSelectedLevel] = useState(userData.level || '');
+  const selectedLevel = userData.level || '';
 
   const handleLevelChange = (level) => {
-    setSelectedLevel(level);
     updateUserData({ level });
   };
 
