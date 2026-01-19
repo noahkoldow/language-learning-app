@@ -62,10 +62,13 @@ export async function translateWithFallback(
 
   // Try LibreTranslate
   try {
-    const result = await translateWithLibre(text, sourceLanguage === 'auto' ? 'en' : sourceLanguage, targetLanguage);
+    // LibreTranslate requires explicit language codes
+    const srcLang = sourceLanguage === 'auto' ? 'en' : sourceLanguage;
+    const result = await translateWithLibre(text, srcLang, targetLanguage);
     // Apply rule-based simplification
     const simplified = simplifyForLevel(result, targetLanguage, cefrLevel);
     currentProvider = API_PROVIDERS.LIBRE_TRANSLATE;
+    console.info('Using LibreTranslate API');
     return { text: simplified, provider: currentProvider };
   } catch (error) {
     console.warn('LibreTranslate failed:', error.message);
@@ -74,10 +77,13 @@ export async function translateWithFallback(
 
   // Try MyMemory
   try {
-    const result = await translateWithMyMemory(text, sourceLanguage === 'auto' ? 'en' : sourceLanguage, targetLanguage);
+    // MyMemory requires explicit language codes
+    const srcLang = sourceLanguage === 'auto' ? 'en' : sourceLanguage;
+    const result = await translateWithMyMemory(text, srcLang, targetLanguage);
     // Apply rule-based simplification
     const simplified = simplifyForLevel(result, targetLanguage, cefrLevel);
     currentProvider = API_PROVIDERS.MYMEMORY;
+    console.info('Using MyMemory API');
     return { text: simplified, provider: currentProvider };
   } catch (error) {
     console.warn('MyMemory translation failed:', error.message);
@@ -112,7 +118,8 @@ export async function translateWordWithFallback(word, targetLanguage, context = 
 
   // Try LibreTranslate for word
   try {
-    const result = await translateWithLibre(word, 'auto', targetLanguage);
+    // Note: 'auto' not well supported, may fail for some words
+    const result = await translateWithLibre(word, 'en', targetLanguage);
     currentProvider = API_PROVIDERS.LIBRE_TRANSLATE;
     return { text: `${word} → ${result}`, provider: currentProvider };
   } catch (error) {
@@ -122,7 +129,8 @@ export async function translateWordWithFallback(word, targetLanguage, context = 
 
   // Try MyMemory for word
   try {
-    const result = await translateWithMyMemory(word, 'auto', targetLanguage);
+    // Note: 'auto' not well supported, may fail for some words
+    const result = await translateWithMyMemory(word, 'en', targetLanguage);
     currentProvider = API_PROVIDERS.MYMEMORY;
     return { text: `${word} → ${result}`, provider: currentProvider };
   } catch (error) {
